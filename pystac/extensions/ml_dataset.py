@@ -4,6 +4,8 @@
 import pystac
 from pystac.extensions.base import ExtensionManagementMixin
 
+pystac.Catalog
+
 from typing import Any, Dict, List, Tuple
 
 
@@ -26,6 +28,11 @@ class MLDatasetExtension(
     :class:`~pystac.Catalog` being extended, including links added by this extension.
     """
 
+    splits: List[pystac.Link]
+    """The list of :class:`~pystac.Link` objects associated with the root
+    :class:`~pystac.Catalog` representing the splits of the dataset.
+    """
+
     def __init__(self, catalog: pystac.Catalog):
         self.catalog = catalog
         self.id = catalog.id
@@ -34,6 +41,7 @@ class MLDatasetExtension(
         self.stac_extensions = catalog.stac_extensions if catalog.stac_extensions else []
         self.extra_fields = self.properties = catalog.extra_fields if catalog.extra_fields else {}
         self.links = catalog.links
+        self.splits = []
         
     def apply(
         self, name: str = None
@@ -95,10 +103,38 @@ class MLDatasetExtension(
     @version.setter
     def version(self, v: str) -> None:
         self.extra_fields[f'{PREFIX}version'] = v
+    
+    @property
+    def splits(self) -> List[pystac.Link]:
+        return self._splits
+
+    @splits.setter
+    def splits(self, v: str) -> None:
+        self.extra_fields[f'{PREFIX}splits'] = v
 
     @classmethod
     def get_schema_uri(cls) -> str:
         return SCHEMA_URI
+    
+    def add_split(self, split: pystac.Link) -> None:
+        """Add a split to this object's set of splits.
+
+        Args:
+             split : The split to add.
+        """
+        split.set_owner(self)
+        split_js = split.to_dict()
+        if split_js not in self.extra_fields[f'{PREFIX}splits']:
+            self.extra_fields[f'{PREFIX}splits'].append(split_js)
+
+    def add_splits(self, splits: List[pystac.Link]) -> None:
+        """Add a list of splits to this object's set of splits.
+
+        Args:
+             splits : The splits to add.
+        """
+        for split in splits:
+            self.add_split(split)
 
     @classmethod
     def ext(cls, obj: pystac.Catalog, add_if_missing: bool = False) -> "MLDatasetExtension":
