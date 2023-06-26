@@ -78,7 +78,7 @@ class MLDatasetExtension(
 
     @inputs_type.setter
     def inputs_type(self, v: str) -> None:
-        self.extra_fields[f'{PREFIX}inputs_type'] = v
+        self.extra_fields[f'{PREFIX}inputs-type'] = v
 
     @property
     def annotations_type(self) -> str:
@@ -86,7 +86,7 @@ class MLDatasetExtension(
 
     @annotations_type.setter
     def annotations_type(self, v: str) -> None:
-        self.extra_fields[f'{PREFIX}annotations_type'] = v
+        self.extra_fields[f'{PREFIX}annotations-type'] = v
 
     @property
     def quality(self) -> str:
