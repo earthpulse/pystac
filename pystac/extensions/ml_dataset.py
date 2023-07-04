@@ -42,6 +42,7 @@ class MLDatasetExtension(
         self.extra_fields = self.properties = catalog.extra_fields if catalog.extra_fields else {}
         self.links = catalog.links
         self.splits = []
+        self.quality_metrics = []
         
     def apply(
         self, name: str = None
@@ -89,12 +90,12 @@ class MLDatasetExtension(
         self.extra_fields[f'{PREFIX}annotations-type'] = v
 
     @property
-    def quality(self) -> str:
+    def quality_metrics(self) -> List[dict]:
         return self._quality
 
-    @quality.setter
-    def quality(self, v: str) -> None:
-        self.extra_fields[f'{PREFIX}quality'] = v
+    @quality_metrics.setter
+    def quality_metrics(self, v: dict) -> None:
+        self.extra_fields[f'{PREFIX}quality-metrics'] = v
 
     @property
     def version(self) -> str:
@@ -135,6 +136,24 @@ class MLDatasetExtension(
         """
         for split in splits:
             self.add_split(split)
+
+    def add_metric(self, metric: dict) -> None:
+        """Add a metric to this object's set of metrics.
+
+        Args:
+             metric : The metric to add.
+        """
+        if metric not in self.extra_fields[f'{PREFIX}quality-metrics']:
+            self.extra_fields[f'{PREFIX}quality-metrics'].append(metric)
+
+    def add_metrics(self, metrics: List[dict]) -> None:
+        """Add a list of metrics to this object's set of metrics.
+
+        Args:
+             metrics : The metrics to add.
+        """
+        for metric in metrics:
+            self.add_metric(metric)
 
     @classmethod
     def ext(cls, obj: pystac.Catalog, add_if_missing: bool = False) -> "MLDatasetExtension":
